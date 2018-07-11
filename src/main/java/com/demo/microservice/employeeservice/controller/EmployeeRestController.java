@@ -50,7 +50,7 @@ public class EmployeeRestController {
         employee.setId(null);
         Employee savedEmployee = employeeService.saveEmployee(employee);
         ApiResponse apiResponse = new ApiResponse("Employee saved Successfully", savedEmployee.getId());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "{employeeId}")
