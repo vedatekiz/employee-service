@@ -36,7 +36,7 @@ public class ErrorController {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse> handleException(DataIntegrityViolationException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getCause().getMessage());
+        ApiResponse apiResponse = new ApiResponse(e.getCause().getMessage() + ". Unique index or primary key violation");
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 }
