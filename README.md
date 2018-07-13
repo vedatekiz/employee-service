@@ -25,7 +25,7 @@ Requirements
 Build & Run
 -----------
 * `mvn spring-boot:run`
-* Point your browser to [http://localhost:8080/](http://localhost:8080/)
+* Point your browser to [http://localhost:8080/] (http://localhost:8080/)
 
 
 Documentation
