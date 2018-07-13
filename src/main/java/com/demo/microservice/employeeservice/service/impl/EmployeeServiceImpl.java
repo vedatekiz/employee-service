@@ -7,6 +7,7 @@ import com.demo.microservice.employeeservice.repository.HobbyRepository;
 import com.demo.microservice.employeeservice.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
@@ -28,6 +30,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public Employee saveEmployee(Employee employee) {
         if(employee.getHobbies() != null && !employee.getHobbies().isEmpty()){
             List<Hobby> hobbies = employee.getHobbies().stream().collect(Collectors.toList());
