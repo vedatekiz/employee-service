@@ -9,6 +9,8 @@ import com.demo.microservice.employeeservice.repository.EmployeeRepository;
 import com.demo.microservice.employeeservice.repository.HobbyRepository;
 import com.demo.microservice.employeeservice.service.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DirectExchange;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("secured/employees")
+@Api(tags = "employees")
 public class EmployeeRestController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -53,14 +57,18 @@ public class EmployeeRestController {
     @Value("${rabbit.employeeOpRoutingKey}")
     private String employeeOpRoutingKey;
 
-    @GetMapping
+    @GetMapping(path = "listAll")
+    @ApiOperation(value = "Lists all employees in database")
     public ResponseEntity<ApiResponse> getAllEmployees() {
         List<EmployeeDTO> employeeDTOList = employeeRepository.findAll().stream().map(employee -> objectMapper.convertValue(employee, EmployeeDTO.class)).collect(Collectors.toList());
         return new ResponseEntity<>(new ApiResponse("Employee List", employeeDTOList), HttpStatus.OK);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ApiOperation(value = "Creates a new employee")
     public ResponseEntity<ApiResponse> createEmployee(@RequestBody @Validated EmployeeDTO employeeDTO) {
+
         Employee employee = objectMapper.convertValue(employeeDTO, Employee.class);
         employee.setId(null);
         Employee savedEmployee = employeeService.saveEmployee(employee);
@@ -72,7 +80,8 @@ public class EmployeeRestController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "{employeeId}")
+    @GetMapping(path = "get/{employeeId}")
+    @ApiOperation(value = "Gets a specific employee")
     public ResponseEntity<ApiResponse> getEmployee(@PathVariable String employeeId) {
         Optional<Employee> employeeByUUID = employeeRepository.findById(UUID.fromString(employeeId));
         if (!employeeByUUID.isPresent()) {
@@ -86,6 +95,8 @@ public class EmployeeRestController {
     }
 
     @PutMapping(path = "{employeeId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ApiOperation(value = "Updates a specific employee")
     public ResponseEntity<ApiResponse> updateEmployee(@PathVariable String employeeId, @RequestBody @Validated EmployeeDTO employeeDTO) {
         Optional<Employee> employeeByUUID = employeeRepository.findById(UUID.fromString(employeeId));
         if (!employeeByUUID.isPresent()) {
@@ -104,6 +115,8 @@ public class EmployeeRestController {
     }
 
     @DeleteMapping(path = "{employeeId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ApiOperation(value = "Deletes a specific employee")
     public ResponseEntity<ApiResponse> deleteEmployee(@PathVariable String employeeId) {
         ApiResponse apiResponse;
         try {

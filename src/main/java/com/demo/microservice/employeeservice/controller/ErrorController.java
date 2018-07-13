@@ -1,6 +1,7 @@
 package com.demo.microservice.employeeservice.controller;
 
 import com.demo.microservice.employeeservice.boundary.ApiResponse;
+import com.demo.microservice.employeeservice.exception.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,5 +41,10 @@ public class ErrorController {
     public ResponseEntity<ApiResponse> handleException(DataIntegrityViolationException e) {
         ApiResponse apiResponse = new ApiResponse(e.getCause().getMessage() + ". Unique index or primary key violation");
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public void handleSecurityException(HttpServletResponse res, SecurityException ex) throws IOException {
+        res.sendError(ex.getHttpStatus().value(), ex.getMessage());
     }
 }
